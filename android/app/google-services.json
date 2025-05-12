@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "118977162384",
+    "project_id": "mercantile-f5c7d",
+    "storage_bucket": "mercantile-f5c7d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:118977162384:android:a4d298d51b18a47eadbc15",
+        "android_client_info": {
+          "package_name": "com.mercantile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBr2hfAogxQvvCUR99WFstSySOkhVnNNEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
