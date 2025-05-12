@@ -1,101 +1,40 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native';
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 
-const OTPVerification: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [otp, setOtp] = useState(new Array(6).fill(''));
-  const [timer, setTimer] = useState(30);
-  const [isResendDisabled, setIsResendDisabled] = useState(true);
-  const inputRefs = useRef<(TextInput | null)[]>([]);
+const OtpForSignup: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
+  const { phone } = route.params;
+  const [otp, setOtp] = useState<string>('');
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isResendDisabled) {
-      interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            setIsResendDisabled(false);
-            return 30;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+  const handleVerifyOtp = () => {
+    if (otp.length !== 6) {
+      Alert.alert('Error', 'Please enter a valid 6-digit OTP.');
+      return;
     }
-    return () => clearInterval(interval);
-  }, [isResendDisabled]);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
-
-  const handleOtpChange = (value: string, index: number) => {
-    if (isNaN(Number(value))) return;
-
-    let newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyPress = (e: any, index: number) => {
-    if (e.nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const navigateToNextScreen = () => {
-    if (otp.join('').length === 6) {
-      navigation.goBack();
-    }
-    if (otp.join('').length < 6) {
-      Alert.alert('Please enter the 6-digit OTP code.');
-    }
+    Alert.alert('Success', 'OTP verified successfully!');
+    navigation.goBack();
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Almost there</Text>
-      <Text style={styles.subtitle}>
-        Please enter the 6-digit code sent to your mobile *****2125 for verification.
-      </Text>
-
-      <View style={styles.otpContainer}>
-        {otp.map((digit, index) => (
-          <TextInput
-            key={index}
-            ref={(el) => (inputRefs.current[index] = el)}
-            style={styles.otpInput}
-            keyboardType="numeric"
-            maxLength={1}
-            value={digit}
-            onChangeText={(value) => handleOtpChange(value, index)}
-            onKeyPress={(e) => handleKeyPress(e, index)}
-          />
-        ))}
-      </View>
-
-      <TouchableOpacity style={styles.verifyButton} onPress={navigateToNextScreen}>
-        <Text style={styles.verifyText}>VERIFY</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.resendText}>
-        <Text style={styles.boldText}>Didn’t receive any code?</Text>
-      </Text>
-      <TouchableOpacity disabled={isResendDisabled} onPress={() => setIsResendDisabled(true)}>
-        <Text style={[styles.timerText, { color: isResendDisabled ? 'gray' : 'red' }]}>
-          {isResendDisabled ? `Request new code in 00:${timer}s` : 'Request new code'}
-        </Text>
+      <Text style={styles.title}>Verify OTP</Text>
+      <Text style={styles.subtitle}>Enter the OTP sent to {phone}</Text>
+      <TextInput
+        style={styles.input}
+        value={otp}
+        onChangeText={setOtp}
+        placeholder="Enter OTP"
+        keyboardType="number-pad"
+        maxLength={6}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleVerifyOtp}>
+        <Text style={styles.buttonText}>Verify</Text>
       </TouchableOpacity>
     </View>
   );
 };
+
+export default OtpForSignup;
 
 const styles = StyleSheet.create({
   container: {
@@ -103,57 +42,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: hp(2),
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: hp(3),
+    fontSize: 24,
     fontWeight: '600',
-    marginBottom: hp(1),
+    marginBottom: 10,
   },
   subtitle: {
-    fontSize: hp(2),
+    fontSize: 16,
     color: 'gray',
     textAlign: 'center',
-    marginBottom: hp(2),
+    marginBottom: 20,
   },
-  otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: hp(2),
-  },
-  otpInput: {
-    width: wp(10.8),
-    height: hp(5.5),
-    borderWidth: wp(0.2),
+  input: {
+    width: '80%',
+    height: 50,
+    borderWidth: 1,
     borderColor: '#ccc',
     textAlign: 'center',
-    fontSize: hp(2.6),
-    marginHorizontal: wp(2),
-    borderRadius: hp(0.9),
+    fontSize: 18,
+    marginBottom: 20,
+    borderRadius: 5,
   },
-  verifyButton: {
+  button: {
     backgroundColor: '#8B0000',
-    paddingVertical: hp(1.5),
-    paddingHorizontal: wp(10),
-    borderRadius: hp(0.9),
-    marginBottom: hp(2),
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 5,
   },
-  verifyText: {
+  buttonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: hp(1.7),
-  },
-  resendText: {
-    fontSize: hp(1.8),
-    color: 'black',
-    marginBottom: hp(0.7),
-  },
-  boldText: {
-    fontWeight: 'bold',
-  },
-  timerText: {
-    fontSize: hp(1.8),
+    fontSize: 16,
   },
 });
-
-export default OTPVerification;
